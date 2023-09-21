@@ -15,10 +15,53 @@ exports.createTask = async (req, res) => {
 }
 
 // function to read tasks
+// Get /tasks?completed=true
+// Get /tasks?limit=10&skip=10
+// Get /tasks?sortBy=createdAt:asc
 exports.readTask = async (req, res) => {
+    const match = {}
+    const sort = {}
+
+    if (req.query.completed) {
+        match.completed = req.query.completed === 'true'
+    }
+
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    }
+
+    // const query = {
+    //     owner: req.user._id
+    // }
+    // const sort = {}
+
+    // if (req.query.completed) {
+    //     query.completed = req.query.completed === 'true'
+    // }
+
+    // if (req.query.sortBy) {
+    //     const parts = req.query.sortBy.split(':')
+    //     sort[parts[0]] = parts[1] === 'desc' ? -1 : 1
+    // }
+
+    // console.log(sort);
+
     try {
-        const tasksData = await Task.find({ owner: req.user._id });
-        res.status(200).send(tasksData);
+        await req.user.populate({
+            path: 'tasks',
+            match,
+            options: {
+                skip: parseInt(req.query.skip),
+                limit: parseInt(req.query.limit),
+                sort
+            }
+        });
+        res.status(200).send(req.user.tasks);
+
+        // const task = await Task.find(query).skip(req.query.skip).limit(req.query.limit).sort(sort)
+        // res.status(200).send(task);
+
     } catch (error) {
         res.status(500).send(error);
     }
