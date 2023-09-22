@@ -5,8 +5,8 @@ const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     auth: {
-        user: 'kevit.niket.bhadeshiya@gmail.com',
-        pass: 'tjjl tbdv bgcx cobs'
+        user: process.env.EMAIL,
+        pass: process.env.APP_PASS
     }
 });
 
@@ -21,7 +21,7 @@ exports.sendWelcomeEmail = async(email, name) => {
         console.log('Welcome Email sended : %s', info.messageId);
         
     } catch (error) {
-        console.log(error.message);
+        console.log(error);
     }
 }
 
@@ -36,6 +36,6 @@ exports.sendCancellationEmail = async(email, name) => {
         console.log('Goodbye Email sended : %s', info.messageId);
         
     } catch (error) {
-        console.log(error.message);
+        console.log(error);
     }
 }

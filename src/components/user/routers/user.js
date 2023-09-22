@@ -1,6 +1,5 @@
 const express = require('express');
 const multer = require('multer');
-const sharp = require('sharp')
 const auth = require('../../../middleware/auth')
 const controller = require('../controller/userController')
 const User = require('../models/user');
@@ -41,36 +40,14 @@ router.get('/users/me', auth, controller.readUser)
 // for update user
 router.patch('/users/me', auth, controller.updateUser)
 
-router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
-    const buffer = await sharp(req.file.buffer).resize({ width:250, height:250 }).png().toBuffer()
-    req.user.avatar = buffer
-    await req.user.save()
-    res.send()
-}, (error, req, res, next) => {
-    res.status(400).send({ error: error.message })
-})
+// for add or update user avatar
+router.post('/users/me/avatar', auth, upload.single('avatar'), controller.uploadAvatar, controller.handleUploadAvatar)
 
-router.delete('/users/me/avatar', auth, async(req, res) => {
-    req.user.avatar = undefined
-    await req.user.save()
-    res.send()
-})
+// to delete user avatar
+router.delete('/users/me/avatar', auth, controller.deleteAvatar)
 
-router.get('/users/:id/avatar', async(req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-
-        if(!user?.avatar){
-            throw new Error()
-        }
-
-        res.set('Content-Type', 'image/png')
-        res.send(user.avatar)
-
-    } catch (error) {
-        res.status(404).send()
-    }
-})
+// to get user avatar
+router.get('/users/:id/avatar', controller.readAvatar)
 
 // for delete user
 router.delete('/users/me', auth, controller.deleteUser)

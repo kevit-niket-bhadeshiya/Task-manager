@@ -1,4 +1,5 @@
 const User = require('../models/user')
+const sharp = require('sharp')
 const { sendWelcomeEmail, sendCancellationEmail } = require('../../../email/account')
 
 
@@ -93,5 +94,51 @@ exports.deleteUser = async (req, res) => {
         res.send(req.user)
     } catch (error) {
         res.status(400).send(error.message);
+    }
+}
+
+// function to add or update user avatar 
+exports.uploadAvatar = async (req, res) => {
+    try {
+        const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+        req.user.avatar = buffer
+        await req.user.save()
+        res.send()
+    } catch (error) {
+        res.status(400).send({ error : error.message})
+    }
+
+}
+
+// function to handle upload avatar error 
+exports.handleUploadAvatar = (error, req, res, next) => {
+    res.status(400).send({ error: error.message })
+}
+
+// function to delete avatar of user 
+exports.deleteAvatar = async (req, res) => {
+    try {
+        req.user.avatar = undefined
+        await req.user.save()
+        res.send()
+    } catch (error) {
+        res.status(404).send()
+    }
+}
+
+// function to get avatar of user 
+exports.readAvatar = async(req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if(!user?.avatar){
+            throw new Error()
+        }
+
+        res.set('Content-Type', 'image/png')
+        res.send(user.avatar)
+
+    } catch (error) {
+        res.status(404).send()
     }
 }

@@ -7,12 +7,13 @@ const taskRouter = require('./components/task/routers/task')
 
 
 const app = express();
-const port = process.env.PORT || 3000
+const port = process.env.PORT
 
 // connect to database
 connectDB();
 
 app.use(express.json())  // it automatically parse incoming object to a json.
+app.use(express.urlencoded({extended: true})); 
 
 // set middleware for routes
 app.use(userRouter);
