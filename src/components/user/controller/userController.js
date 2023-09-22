@@ -1,10 +1,13 @@
 const User = require('../models/user')
+const { sendWelcomeEmail, sendCancellationEmail } = require('../../../email/account')
+
 
 // function to create user
 exports.createUser = async (req, res) => {
     const user = new User(req.body);
     try {
         await user.save()
+        sendWelcomeEmail(user.email, user.name);
         const token = await user.generateAuthToken();
         res.status(201).send({ user, token });
     } catch (error) {
@@ -86,6 +89,7 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     try {
         await User.findOneAndDelete({ _id: req.user._id })
+        sendCancellationEmail(req.user.email, req.user.name);
         res.send(req.user)
     } catch (error) {
         res.status(400).send(error.message);
