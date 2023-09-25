@@ -21,9 +21,16 @@ exports.sendWelcomeEmail = async(email, name) => {
         console.log('Welcome Email sended : %s', info.messageId);
         
     } catch (error) {
-        console.log(error);
+        console.log(error.message);
     }
 }
+
+/**
+ * Represents a book.
+ * @constructor
+ * @param {string} title - The title of the book.
+ * @param {string} author - The author of the book.
+ */
 
 exports.sendCancellationEmail = async(email, name) => {
     try {
@@ -36,6 +43,6 @@ exports.sendCancellationEmail = async(email, name) => {
         console.log('Goodbye Email sended : %s', info.messageId);
         
     } catch (error) {
-        console.log(error);
+        console.log(error.message);
     }
 }

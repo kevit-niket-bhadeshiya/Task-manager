@@ -68,7 +68,6 @@ userSchema.virtual('tasks', {
 userSchema.methods.toJSON = function () {  // it will call internally by JSON.stringify(). we don't need to call it.
     const user = this
     const userObject = user.toObject();  // it is used to convert mongoose document to an object.
-    // const userObject  ={...user._doc}
 
     delete userObject.password
     delete userObject.tokens

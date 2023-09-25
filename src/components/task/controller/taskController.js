@@ -115,12 +115,12 @@ exports.updateTask = async (req, res) => {
 // function to delete specific task
 exports.deleteTask = async (req, res) => {
     try {
-        const deletedData = await Task.findByIdAndDelete({ _id: req.params.id, owner: req.user._id });
+        const deletedData = await Task.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
         if (!deletedData) {
             return res.status(404).send();
         }
         res.send(deletedData);
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).send(error.message)
     }
 }

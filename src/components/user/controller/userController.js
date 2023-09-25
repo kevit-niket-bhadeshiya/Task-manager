@@ -23,7 +23,6 @@ exports.userLogin = async (req, res) => {
         const token = await user.generateAuthToken()
         res.send({ user, token });
     } catch (error) {
-        console.log(error);
         res.status(400).send(error.message)
     }
 }
@@ -127,6 +126,11 @@ exports.deleteAvatar = async (req, res) => {
 }
 
 // function to get avatar of user 
+
+/*
+@param req {param.id} id=userId
+@returns res {message}
+*/
 exports.readAvatar = async(req, res) => {
     try {
         const user = await User.findById(req.params.id);
