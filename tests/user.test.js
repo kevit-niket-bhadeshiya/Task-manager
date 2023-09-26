@@ -11,8 +11,8 @@ test('should sigup a new user', async () => {
         email: "ab@example.com",
         password: "MyPass777!"
     }).expect(201)
-    
-    
+
+
     // Assert that the database was changed correctly
     const user = await User.findById(response.body.user._id)
     expect(user).not.toBeNull()
@@ -100,15 +100,57 @@ test('should update valid user fields', async () => {
 
     const user = await User.findById(userOneId)
     expect(user.name).not.toBe(userOne.name)
-}) 
+})
 
-test('should not update invalid user fields', async() => {
+test('should not update invalid user fields', async () => {
     await request(app)
         .patch('/users/me')
         .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
         .send({
-            location:'rajkot'
+            location: 'rajkot'
         })
         .expect(400)
+})
+
+// User Test Ideas
+//
+// Should not signup user with invalid name/email/password
+test('should not signup user with invalid name/email/password', async () => {
+    await request(app)
+        .post('/users')
+        .send({
+            email: "ab@12.com",
+            password: "ab23"
+        })
+        .expect(400)
+})
+
+// Should not update user if unauthenticated
+test('should not update user if unauthenticated', async () => {
+    await request(app)
+        .patch('/users/me')
+        .send({
+            name: 'mihir'
+        })
+        .expect(401)
+})
+
+// Should not update user with invalid name/email/password
+test('should not update user with invalid name/email/password', async() => {
+    await request(app)
+    .patch('/users/me')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .send({
+        email: "ab@ex.com",
+        password: "123"
+    })
+    .expect(400)
+})
+
+// Should not delete user if unauthenticated
+test('should not delete user if unauthenticated', async() => {
+    await request(app)
+    .delete('/users/me')
+    .expect(401)
 })
 
