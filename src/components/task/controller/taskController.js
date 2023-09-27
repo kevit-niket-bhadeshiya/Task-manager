@@ -1,6 +1,11 @@
 const Task = require('../models/task');
 
-// function to create task
+/**
+ * Create new task
+ * @param {Task} req.body.required - task info 
+ * @returns {Task} 200 - success response - newly created task
+ * @returns {object} 400 - Bad request response
+ */
 exports.createTask = async (req, res) => {
     const task = new Task({
         ...req.body,
@@ -10,15 +15,21 @@ exports.createTask = async (req, res) => {
         const result = await task.save();
         res.status(201).send(result);
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({error})
     }
 }
 
-// function to read tasks
-// Get /tasks?completed=true
-// Get /tasks?limit=10&skip=10
-// Get /tasks?sortBy=createdAt:asc
+/**
+ * Read tasks of user
+ * Get /tasks?completed=true
+ * Get /tasks?limit=10&skip=10
+ * Get /tasks?sortBy=createdAt:asc
+ * @param {object} req.query - filteration | paging | sorting
+ * @returns {ArrayOfObject} 200 - success response - contains user's tasks 
+ * @returns {object} - 500 - internal server error
+ */ 
 exports.readTask = async (req, res) => {
+    console.log(typeof(req));
     const match = {}
     const sort = {}
 
@@ -63,11 +74,17 @@ exports.readTask = async (req, res) => {
         // res.status(200).send(task);
 
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).send({error});
     }
 }
 
-// function to read specific task of user
+/**
+ * Read specific task of user
+ * @param {string} req.params.id.required - task id
+ * @param {object} req.user.required - generated from auth middleware
+ * @returns {Task} 200 - success response - task of user
+ * @returns {object} 400 - Bad request response
+ */
 exports.readTaskById = async (req, res) => {
     const _id = req.params.id;
 
@@ -80,11 +97,18 @@ exports.readTaskById = async (req, res) => {
 
         res.send(taskData);
     } catch (error) {
-        res.status(400).send(error);
+        res.status(400).send({error});
     }
 }
 
-// function to update task 
+/**
+ * Update task of user
+ * @param {Task} req.body.required - task info to be updated
+ * @param {object} req.user.required - generated from middleware auth
+ * @returns {Task} 200 - success response - updated Task
+ * @returns {object} 404 - Not found - Invalid Updates..!!
+ * @returns {object} 400 - Bad request response
+ */
 exports.updateTask = async (req, res) => {
     const updates = Object.keys(req.body);
     const allowedUpdates = ['description', 'completed'];
@@ -112,7 +136,13 @@ exports.updateTask = async (req, res) => {
     }
 }
 
-// function to delete specific task
+/**
+ * Delete task of user
+ * @param {object} req.params.id.required - id of task to be deleted.
+ * @returns {Task} 200 - success response - deleted task of user
+ * @returns {null} 404 - Not found - not found task to be deleted
+ * @returns {object} 400 - Bad request response 
+ */
 exports.deleteTask = async (req, res) => {
     try {
         const deletedData = await Task.findOneAndDelete({ _id: req.params.id, owner: req.user._id });
@@ -121,6 +151,6 @@ exports.deleteTask = async (req, res) => {
         }
         res.send(deletedData);
     } catch (error) {
-        res.status(400).send(error.message)
+        res.status(400).send({error})
     }
 }

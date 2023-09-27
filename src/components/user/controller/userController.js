@@ -3,7 +3,12 @@ const sharp = require('sharp')
 const { sendWelcomeEmail, sendCancellationEmail } = require('../../../email/account')
 
 
-// function to create user
+/**
+ * Create user
+ * @param {User} req.body.required - user info
+ * @returns {object} 200 - success response - sends newly created user and it's token
+ * @returns {object} 400 - Bad request response
+ */
 exports.createUser = async (req, res) => {
     const user = new User(req.body);
     try {
@@ -16,28 +21,43 @@ exports.createUser = async (req, res) => {
     }
 }
 
-// function to login user
+/**
+ * Login user
+ * @param {object} req.body.required - to login user 
+ * @returns {object} 200 - success response - sends user info and it's new token
+ * @returns {object} 400 - Bad request response
+ */
 exports.userLogin = async (req, res) => {
     try {
         const user = await User.findByCredentials(req.body.email, req.body.password);
         const token = await user.generateAuthToken()
         res.send({ user, token });
     } catch (error) {
-        res.status(400).send(error.message)
+        res.status(400).send({error})
     }
 }
 
-// function to read all users from db
+/**
+ * Read all users 
+ * @param {object} req 
+ * @returns {Array of Object} 200 - success response - sends all users
+ * @returns {object} 500 - internal server error
+ */
 exports.readUsers = async (req, res) => {
     try {
         const usersData = await User.find();
         res.status(201).send(usersData);
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).send({error});
     }
 }
 
-// function to user logout
+/**
+ * Logout user
+ * @param {object} req.user.required - generated from middleware auth
+ * @returns {null} 200 - success response 
+ * @returns {null} 500 - internal server error
+ */
 exports.userLogout = async (req, res) => {
     try {
         req.user.tokens = req.user.tokens.filter((token) => token.token !== req.token);
@@ -48,7 +68,12 @@ exports.userLogout = async (req, res) => {
     }
 }
 
-// function to logout user from all devices they login
+/**
+ * Logout user from all devices they login
+ * @param {object} req.user.required - generated from middleware auth
+ * @returns {null} 200 - success response
+ * @returns {null} 500 - internal server error 
+ */
 exports.userLogoutFromAll = async (req, res) => {
     try {
         req.user.tokens = [];
@@ -59,12 +84,21 @@ exports.userLogoutFromAll = async (req, res) => {
     }
 }
 
-// function to read user data
+/**
+ * Read user data
+ * @param {object} req.user.required - generated from middleware auth
+ * @param {User} 200 - success response - sends user's data
+ */
 exports.readUser = async (req, res) => {
     res.send(req.user);
 }
 
-// function to update user
+/**
+ * Update user
+ * @param {object} req.body.required - user info to be updated.
+ * @returns {User} 200 - success response - newly updated data of user
+ * @returns {object} 400 - Bad request response - invalid updates
+ */
 exports.updateUser = async (req, res) => {
     const updates = Object.keys(req.body);
     const allowedUpdates = ['name', 'email', 'password', 'age'];
@@ -81,22 +115,33 @@ exports.updateUser = async (req, res) => {
 
         res.send(req.user);
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({error})
     }
 }
 
-// function to delete user
+/**
+ * Delete user
+ * @param {object} req.user.required - user info to be deleted generated from middleware auth
+ * @param {User} 200 - success response - deleted user data
+ * @param {object} 400 - Bad request response
+ */
 exports.deleteUser = async (req, res) => {
     try {
         await User.findOneAndDelete({ _id: req.user._id })
         sendCancellationEmail(req.user.email, req.user.name);
         res.send(req.user)
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(400).send({error});
     }
 }
 
-// function to add or update user avatar 
+/**
+ * Add or update user avatar 
+ * @param {object} req.file - file to be added or updated 
+ * @param {object} req.user.required - generated from auth middleware
+ * @returns {null} 200 - success response 
+ * @returns {object} 400 - Bad request response 
+ */
 exports.uploadAvatar = async (req, res) => {
     try {
         const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
@@ -109,38 +154,46 @@ exports.uploadAvatar = async (req, res) => {
 
 }
 
-// function to handle upload avatar error 
+/**
+ * Handle upload avatar error 
+ */
 exports.handleUploadAvatar = (error, req, res, next) => {
     res.status(400).send({ error: error.message })
 }
 
-// function to delete avatar of user 
+/**
+ * Delete avatar of user 
+ * @param {object} req.user.required - generated from middleware auth
+ * @returns {null} 200 - success response 
+ * @returns {object} 500 - internal server error
+ */
 exports.deleteAvatar = async (req, res) => {
     try {
         req.user.avatar = undefined
         await req.user.save()
         res.send()
     } catch (error) {
-        res.status(404).send()
+        res.status(500).send(error.message)
     }
 }
 
-// function to get avatar of user 
-
-/*
-@param req {param.id} id=userId
-@returns res {message}
-*/
+/**
+ * Get avatar of user 
+ * @param {object} req.user.required - generated from auth middleware 
+ * @returns {Buffer} 200 - success response - image/png
+ * @returns {null} 404 - Not found
+ */
 exports.readAvatar = async(req, res) => {
     try {
-        const user = await User.findById(req.params.id);
+        console.log(req.user);
+        // const user = await User.findById(req.params.id);
 
-        if(!user?.avatar){
+        if(!req.user?.avatar){
             throw new Error()
         }
 
         res.set('Content-Type', 'image/png')
-        res.send(user.avatar)
+        res.send(req.user.avatar)
 
     } catch (error) {
         res.status(404).send()

@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer')
-// tjjl tbdv bgcx cobs
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -9,6 +8,12 @@ const transporter = nodemailer.createTransport({
         pass: process.env.APP_PASS
     }
 });
+
+/**
+ * Sends welcome mail to user.
+ * @param {string} email - email of user
+ * @param {string} name - name of user
+ */
 
 exports.sendWelcomeEmail = async(email, name) => {
     try {
@@ -26,12 +31,10 @@ exports.sendWelcomeEmail = async(email, name) => {
 }
 
 /**
- * Represents a book.
- * @constructor
- * @param {string} title - The title of the book.
- * @param {string} author - The author of the book.
+ * Sends unsubsribe mail to user
+ * @param {*} email email of user
+ * @param {string} name name of user
  */
-
 exports.sendCancellationEmail = async(email, name) => {
     try {
         const info = await transporter.sendMail({

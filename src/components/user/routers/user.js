@@ -47,7 +47,7 @@ router.post('/users/me/avatar', auth, upload.single('avatar'), controller.upload
 router.delete('/users/me/avatar', auth, controller.deleteAvatar)
 
 // to get user avatar 
-router.get('/users/:id/avatar', controller.readAvatar)
+router.get('/users/me/avatar', auth, controller.readAvatar)
 
 // for delete user
 router.delete('/users/me', auth, controller.deleteUser)

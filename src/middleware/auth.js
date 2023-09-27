@@ -1,11 +1,16 @@
 const jwt = require('jsonwebtoken');
 const User = require('../components/user/models/user');
 
+/**
+ * Middleware function to validate user
+ * @param {object} req.header.required - to get token and verify user
+ * @param {Function} next - to continue execution after authenticate user
+ * @returns {object} 401 - Unauthorized
+ */
+
 const auth = async(req, res, next) => {
     try {
-        // console.log();
         const token = req.header('Authorization').replace('Bearer ', '')
-        // console.log(token);
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const user = await User.findOne({ _id: decoded._id, 'tokens.token': token })
