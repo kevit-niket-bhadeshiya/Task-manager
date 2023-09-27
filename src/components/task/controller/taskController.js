@@ -29,7 +29,6 @@ exports.createTask = async (req, res) => {
  * @returns {object} - 500 - internal server error
  */ 
 exports.readTask = async (req, res) => {
-    console.log(typeof(req));
     const match = {}
     const sort = {}
 
